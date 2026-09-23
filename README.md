@@ -157,6 +157,58 @@ npm run build
 
 ---
 
+## Production Deployment Guide
+
+Apex is configured for deployment to **FastAPI Cloud** for the backend and **Netlify** for the frontend.
+
+### 1. Deploy Backend to FastAPI Cloud
+
+FastAPI Cloud provides one-command deployment powered by the official `fastapi-cli`:
+
+```bash
+cd backend
+
+# 1. Login to your FastAPI Cloud account (opens browser authentication)
+uv run fastapi login
+
+# 2. Deploy your FastAPI application directly to FastAPI Cloud
+uv run fastapi deploy
+```
+
+#### Set Environment Variables on FastAPI Cloud:
+In your FastAPI Cloud application dashboard:
+- Set `OPENROUTER_API_KEY` to your OpenRouter API key (`sk-or-v1-...`).
+- Set `OPENROUTER_MODEL` to `openrouter/free`.
+
+Once deployed, copy your production API URL (e.g. `https://apex-api.fastapi.cloud`).
+
+---
+
+### 2. Deploy Frontend to Netlify
+
+The frontend is configured with [`frontend/netlify.toml`](file:///home/kartik/Projects/Apex/frontend/netlify.toml) and [`frontend/public/_redirects`](file:///home/kartik/Projects/Apex/frontend/public/_redirects) for client-side SPA routing and Vite asset bundling.
+
+#### Method A: Continuous Deployment via GitHub (Recommended)
+1. Go to [app.netlify.com](https://app.netlify.com) and click **"Add new site" > "Import an existing project"**.
+2. Select your GitHub repository.
+3. Configure site build settings:
+   - **Base directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Publish directory**: `frontend/dist`
+4. In **Site configuration > Environment variables**, add:
+   - `VITE_API_BASE_URL`: Paste your FastAPI Cloud URL (e.g. `https://apex-api.fastapi.cloud`).
+5. Click **Deploy Site**. Netlify will build and distribute the app with global CDN caching and automatic HTTPS.
+
+#### Method B: Deploy via Netlify CLI
+```bash
+cd frontend
+
+# Deploy directly from terminal
+npx netlify-cli deploy --build --prod
+```
+
+---
+
 ## Pushing to GitHub
 
 To push this repository to GitHub, follow these steps:

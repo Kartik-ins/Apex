@@ -26,22 +26,43 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS setup
+# CORS setup: Configured with local dev, production Netlify frontend, and env overrides
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "*",
+    "https://apexfront.netlify.app",
 ]
+
+# Add frontend domain from environment if provided (e.g. Netlify URL)
+for env_key in ("FRONTEND_URL", "ALLOWED_ORIGINS"):
+    val = os.getenv(env_key)
+    if val:
+        for url in val.split(","):
+            url = url.strip().rstrip("/")
+            if url and url not in origins:
+                origins.append(url)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"^https:\/\/([a-zA-Z0-9_-]+\.)*netlify\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", summary="Root Endpoint")
+async def root() -> dict[str, Any]:
+    """Root endpoint to verify deployment in browser."""
+    return {
+        "service": "Apex AI Coach API",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/api/health",
+    }
 
 
 @app.get("/api/health", summary="Health Check")

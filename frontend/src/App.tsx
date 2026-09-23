@@ -5,6 +5,11 @@ import { CheckinForm } from './components/CheckinForm';
 import { CoachResult } from './components/CoachResult';
 import { CheckinRequest, CoachResponse, HealthStatus } from './types';
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? 'https://apex-backend.fastapicloud.dev' : '')
+).replace(/\/+$/, '');
+
 export const App: React.FC = () => {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,7 +26,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await axios.get<HealthStatus>('/api/health');
+        const response = await axios.get<HealthStatus>(`${API_BASE_URL}/api/health`);
         setHealth(response.data);
       } catch (err) {
         console.warn('Backend not responding to health check:', err);
@@ -56,7 +61,7 @@ export const App: React.FC = () => {
     };
 
     try {
-      const response = await axios.post<CoachResponse>('/api/checkin', payload);
+      const response = await axios.post<CoachResponse>(`${API_BASE_URL}/api/checkin`, payload);
       setResult(response.data);
     } catch (err: unknown) {
       console.error('Error submitting checkin:', err);

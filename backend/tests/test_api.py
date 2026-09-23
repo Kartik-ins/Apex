@@ -10,6 +10,29 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_root_endpoint():
+    """Verify root endpoint returns 200 with service info."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "online"
+    assert "health" in data
+
+
+def test_cors_headers():
+    """Verify CORS preflight and headers allow apexfront.netlify.app."""
+    response = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://apexfront.netlify.app",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://apexfront.netlify.app"
+    assert response.headers["access-control-allow-credentials"] == "true"
+
+
 def test_health_endpoint():
     """Verify health check returns expected status and configuration."""
     response = client.get("/api/health")
